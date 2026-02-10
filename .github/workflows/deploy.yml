@@ -1,0 +1,136 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      ALICLOUD_ACCESS_KEY_ID: ${{ secrets.ALICLOUD_ACCESS_KEY_ID }}
+      ALICLOUD_ACCESS_KEY_SECRET: ${{ secrets.ALICLOUD_ACCESS_KEY_SECRET }}
+      OSS_BUCKET: ${{ secrets.OSS_BUCKET }}
+      OSS_REGION: ${{ secrets.OSS_REGION }}
+      FC_SERVICE: ${{ secrets.FC_SERVICE }}
+      FC_FUNCTION: ${{ secrets.FC_FUNCTION }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      ALLOW_ORIGIN: ${{ secrets.ALLOW_ORIGIN }}
+      OSS_ENDPOINT: ${{ secrets.OSS_ENDPOINT }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build frontend
+        run: |
+          cd admin-web
+          npm install
+          npm run build
+
+      - name: Build backend
+        run: |
+          cd admin-api
+          npm install
+          npm run build
+
+      - name: Upload frontend dist to OSS
+        run: |
+          cd admin-api
+          node - <<'NODE'
+          const fs = require('node:fs/promises');
+          const path = require('node:path');
+          const OSS = require('ali-oss');
+
+          const required = [
+            'ALICLOUD_ACCESS_KEY_ID',
+            'ALICLOUD_ACCESS_KEY_SECRET',
+            'OSS_BUCKET',
+            'OSS_REGION',
+          ];
+
+          for (const key of required) {
+            if (!process.env[key]) {
+              throw new Error(`Missing environment variable: ${key}`);
+            }
+          }
+
+          const contentTypes = {
+            '.html': 'text/html; charset=utf-8',
+            '.js': 'application/javascript; charset=utf-8',
+            '.mjs': 'application/javascript; charset=utf-8',
+            '.css': 'text/css; charset=utf-8',
+            '.json': 'application/json; charset=utf-8',
+            '.svg': 'image/svg+xml',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.ico': 'image/x-icon',
+            '.txt': 'text/plain; charset=utf-8',
+            '.map': 'application/json; charset=utf-8',
+            '.woff': 'font/woff',
+            '.woff2': 'font/woff2',
+          };
+
+          const walk = async (dir) => {
+            const entries = await fs.readdir(dir, { withFileTypes: true });
+            const files = await Promise.all(
+              entries.map((entry) => {
+                const full = path.join(dir, entry.name);
+                return entry.isDirectory() ? walk(full) : full;
+              }),
+            );
+            return files.flat();
+          };
+
+          const client = new OSS({
+            region: process.env.OSS_REGION,
+            bucket: process.env.OSS_BUCKET,
+            endpoint: process.env.OSS_ENDPOINT || undefined,
+            accessKeyId: process.env.ALICLOUD_ACCESS_KEY_ID,
+            accessKeySecret: process.env.ALICLOUD_ACCESS_KEY_SECRET,
+          });
+
+          const distDir = path.resolve(process.cwd(), '../admin-web/dist');
+          const files = await walk(distDir);
+
+          for (const file of files) {
+            const rel = path.relative(distDir, file).replace(/\\/g, '/');
+            const ext = path.extname(file).toLowerCase();
+            const contentType = contentTypes[ext] || 'application/octet-stream';
+            const cacheControl = rel.endsWith('.html')
+              ? 'no-cache, no-store, must-revalidate'
+              : 'public, max-age=31536000, immutable';
+
+            await client.put(rel, file, {
+              headers: {
+                'Content-Type': contentType,
+                'Cache-Control': cacheControl,
+              },
+            });
+            console.log(`Uploaded: ${rel}`);
+          }
+
+          console.log('OSS upload completed.');
+          NODE
+
+      - name: Install Serverless Devs
+        run: npm install -g @serverless-devs/s
+
+      - name: Configure Serverless Devs account
+        run: s config add -a default --AccessKeyID "$ALICLOUD_ACCESS_KEY_ID" --AccessKeySecret "$ALICLOUD_ACCESS_KEY_SECRET" -f
+
+      - name: Deploy Function Compute
+        run: |
+          cd admin-api
+          export JWT_SECRET="${JWT_SECRET:-change-this-in-production}"
+          export ALLOW_ORIGIN="${ALLOW_ORIGIN:-*}"
+          npm prune --omit=dev
+          s deploy -y

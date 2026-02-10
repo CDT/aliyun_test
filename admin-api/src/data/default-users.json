@@ -1,0 +1,18 @@
+[
+  {
+    "id": "u-admin",
+    "username": "admin",
+    "password": "admin123",
+    "role": "admin",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "u-user",
+    "username": "user",
+    "password": "user123",
+    "role": "user",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  }
+]

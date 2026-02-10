@@ -1,0 +1,32 @@
+{
+  "name": "admin-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Alibaba Cloud FC backend for admin demo",
+  "main": "dist/handler.js",
+  "scripts": {
+    "dev": "tsx watch src/local.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/local.js",
+    "lint": "eslint \"src/**/*.ts\"",
+    "deploy:fc": "npm run build && s deploy -y"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ali-oss": "^6.23.0",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.16.5",
+    "@typescript-eslint/eslint-plugin": "^8.6.0",
+    "@typescript-eslint/parser": "^8.6.0",
+    "eslint": "^8.57.1",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  }
+}
+

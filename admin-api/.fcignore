@@ -1,0 +1,8 @@
+src/
+*.md
+*.log
+.eslintrc.cjs
+tsconfig.json
+tsconfig.build.json
+.env
+.env.*
