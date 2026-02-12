@@ -1,6 +1,6 @@
 # Alibaba Cloud Serverless Admin Demo
 
-这是一个可直接落地到阿里云中国内地地域的全栈 Admin Demo：
+这是一个基于阿里云的全栈 Admin Demo（当前部署地域：香港）：
 
 - 前端：React + Vite + TypeScript + Ant Design
 - 后端：Function Compute（FC）Node.js 18 + TypeScript + HTTP Trigger
@@ -89,7 +89,7 @@ Vite 已配置代理：`/api -> http://localhost:9000`
 - `ALLOW_ORIGIN`：允许跨域来源（逗号分隔）
 - `API_PREFIX`：默认 `/api`
 - `OSS_BUCKET`：可选，启用 OSS JSON 持久化时填写
-- `OSS_REGION`：如 `cn-hangzhou`
+- `OSS_REGION`：如 `cn-hongkong`
 - `OSS_ENDPOINT`：可选，自定义 OSS endpoint
 - `OSS_OBJECT_KEY`：可选，默认 `admin-demo/users.json`
 
@@ -107,7 +107,7 @@ Vite 已配置代理：`/api -> http://localhost:9000`
 ## 6.1 创建 OSS Bucket（静态网站托管）
 
 1. 进入 OSS 控制台，创建 Bucket（如 `admin-demo-yourname`）。
-2. 地域选择中国内地（例如 `华东1-杭州`）。
+2. 地域选择中国香港（`cn-hongkong`），无需备案即可绑定自定义域名。
 3. 读写权限建议按你的安全策略设置（演示可公共读）。
 4. 打开“静态页面”功能：
    - 默认首页：`index.html`
@@ -131,7 +131,7 @@ Linux/macOS:
 
 ```bash
 cd admin-api
-export OSS_REGION=cn-hangzhou
+export OSS_REGION=cn-hongkong
 export FC_SERVICE=admin-demo-service
 export FC_FUNCTION=admin-demo-api
 export JWT_SECRET='replace-with-a-strong-secret'
@@ -148,7 +148,7 @@ Windows PowerShell:
 
 ```powershell
 cd admin-api
-$env:OSS_REGION='cn-hangzhou'
+$env:OSS_REGION='cn-hongkong'
 $env:FC_SERVICE='admin-demo-service'
 $env:FC_FUNCTION='admin-demo-api'
 $env:JWT_SECRET='replace-with-a-strong-secret'
@@ -182,7 +182,7 @@ npm run build
 ```bash
 cd ..
 export OSS_BUCKET='你的Bucket名'
-export OSS_REGION='cn-hangzhou'
+export OSS_REGION='cn-hongkong'
 export ALICLOUD_ACCESS_KEY_ID='你的AK'
 export ALICLOUD_ACCESS_KEY_SECRET='你的SK'
 echo "Use GitHub Actions deploy workflow to upload dist to OSS"

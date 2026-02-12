@@ -17,7 +17,7 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || 'change-this-in-production',
   allowOrigin: process.env.ALLOW_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173',
   ossBucket: process.env.OSS_BUCKET || '',
-  ossRegion: process.env.OSS_REGION || 'cn-hangzhou',
+  ossRegion: process.env.OSS_REGION || 'cn-hongkong',
   ossEndpoint: process.env.OSS_ENDPOINT || '',
   ossObjectKey: process.env.OSS_OBJECT_KEY || 'admin-demo/users.json',
 };

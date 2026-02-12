@@ -6,7 +6,7 @@ services:
   admin-api:
     component: devsapp/fc
     props:
-      region: cn-hangzhou
+      region: cn-hongkong
       service:
         name: admin-demo-service
         description: Admin demo service
@@ -22,7 +22,7 @@ services:
         environmentVariables:
           JWT_SECRET: change-this-in-production
           OSS_BUCKET: ''
-          OSS_REGION: cn-hangzhou
+          OSS_REGION: cn-hongkong
           OSS_ENDPOINT: ''
           OSS_OBJECT_KEY: admin-demo/users.json
           ALLOW_ORIGIN: '*'
