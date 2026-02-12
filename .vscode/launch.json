@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Admin API: npm run dev",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}/admin-api"
+    },
+    {
+      "name": "Admin Web: Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/admin-web",
+      "preLaunchTask": "Admin Web: npm run dev"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Run API + Web",
+      "configurations": [
+        "Admin API: npm run dev",
+        "Admin Web: Chrome"
+      ]
+    }
+  ]
+}
