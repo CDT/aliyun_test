@@ -44,10 +44,10 @@ jobs:
       - name: Upload frontend dist to OSS
         run: |
           cd admin-api
-          node - <<'NODE'
-          const fs = require('node:fs/promises');
-          const path = require('node:path');
-          const OSS = require('ali-oss');
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs/promises';
+          import path from 'node:path';
+          import OSS from 'ali-oss';
 
           const required = [
             'ALICLOUD_ACCESS_KEY_ID',
