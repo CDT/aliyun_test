@@ -32,9 +32,6 @@
 repo-root/
   admin-web/
   admin-api/
-  deploy/
-    oss-upload.sh
-    fc-deploy.md
   .github/workflows/
     deploy.yml
   README.md
@@ -188,10 +185,10 @@ export OSS_BUCKET='你的Bucket名'
 export OSS_REGION='cn-hangzhou'
 export ALICLOUD_ACCESS_KEY_ID='你的AK'
 export ALICLOUD_ACCESS_KEY_SECRET='你的SK'
-bash deploy/oss-upload.sh
+echo "Use GitHub Actions deploy workflow to upload dist to OSS"
 ```
 
-> 若在 Windows，本脚本可在 Git Bash / WSL 里执行；或在 CI 中自动执行（见第 7 节）。
+> 前端 OSS 上传由 `.github/workflows/deploy.yml` 自动执行。
 
 ## 6.4 前端改为调用线上 API
 
@@ -207,7 +204,7 @@ VITE_API_BASE=https://<你的FC触发域名>/api
 cd admin-web
 npm run build
 cd ..
-bash deploy/oss-upload.sh
+echo "Push to main to trigger GitHub Actions deployment"
 ```
 
 ## 7. GitHub Actions 自动部署

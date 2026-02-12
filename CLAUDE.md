@@ -31,7 +31,6 @@ Monorepo with two packages:
 
 - **admin-web/** — React 18 + Vite + TypeScript + Ant Design + React Router 6. Axios interceptor auto-injects JWT and redirects to login on 401.
 - **admin-api/** — Alibaba Cloud Function Compute (Node 18 + TypeScript). Lightweight HTTP handler (no Express). JWT auth + RBAC middleware. Persists users to local JSON with optional OSS JSON persistence.
-- **deploy/** — `oss-upload.sh` for static hosting, `fc-deploy.md` for FC. CI/CD via `.github/workflows/deploy.yml`.
 
 ### Key directories
 | Path | Purpose |

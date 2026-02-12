@@ -3,7 +3,6 @@
 ## Project Structure & Module Organization
 - `admin-web/`: React + Vite frontend. Main folders: `src/api` (HTTP layer), `src/pages` (route pages), `src/layouts` (admin shell), `src/store` (auth state), `src/router` (route guards).
 - `admin-api/`: Function Compute backend (TypeScript). Main folders: `src/app.ts` (routing/handlers), `src/middleware` (JWT/RBAC), `src/services` (user store + optional OSS persistence), `src/data/default-users.json` (demo seed data).
-- `deploy/`: deployment helpers (`oss-upload.sh`, `fc-deploy.md`).
 - `.github/workflows/deploy.yml`: CI/CD for OSS upload and FC deployment.
 
 No dedicated test directories are present yet.

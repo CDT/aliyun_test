@@ -10,8 +10,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      ALICLOUD_ACCESS_KEY_ID: ${{ secrets.ALICLOUD_ACCESS_KEY_ID }}
-      ALICLOUD_ACCESS_KEY_SECRET: ${{ secrets.ALICLOUD_ACCESS_KEY_SECRET }}
+      ALICLOUD_ACCESS_KEY_ID: ${{ secrets.ALICLOUD_ACCESS_KEY_ID || secrets.ALIBABA_CLOUD_ACCESS_KEY_ID }}
+      ALICLOUD_ACCESS_KEY_SECRET: ${{ secrets.ALICLOUD_ACCESS_KEY_SECRET || secrets.ALIBABA_CLOUD_ACCESS_KEY_SECRET }}
+      ALIBABA_CLOUD_ACCESS_KEY_ID: ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_ID || secrets.ALICLOUD_ACCESS_KEY_ID }}
+      ALIBABA_CLOUD_ACCESS_KEY_SECRET: ${{ secrets.ALIBABA_CLOUD_ACCESS_KEY_SECRET || secrets.ALICLOUD_ACCESS_KEY_SECRET }}
       OSS_BUCKET: ${{ secrets.OSS_BUCKET }}
       OSS_REGION: ${{ secrets.OSS_REGION }}
       FC_SERVICE: ${{ secrets.FC_SERVICE }}
@@ -28,6 +30,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Validate deploy secrets
+        shell: bash
+        run: |
+          missing=()
+          for key in ALICLOUD_ACCESS_KEY_ID ALICLOUD_ACCESS_KEY_SECRET OSS_BUCKET OSS_REGION; do
+            if [[ -z "${!key}" ]]; then
+              missing+=("$key")
+            fi
+          done
+
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing required secrets/env: ${missing[*]}."
+            echo "::error::Set repo secrets ALICLOUD_ACCESS_KEY_ID/SECRET (or ALIBABA_CLOUD_ACCESS_KEY_ID/SECRET), OSS_BUCKET, OSS_REGION."
+            exit 1
+          fi
 
       - name: Build frontend
         run: |
@@ -49,16 +67,20 @@ jobs:
           import path from 'node:path';
           import OSS from 'ali-oss';
 
+          const accessKeyId = process.env.ALICLOUD_ACCESS_KEY_ID || process.env.ALIBABA_CLOUD_ACCESS_KEY_ID;
+          const accessKeySecret =
+            process.env.ALICLOUD_ACCESS_KEY_SECRET || process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET;
+
           const required = [
-            'ALICLOUD_ACCESS_KEY_ID',
-            'ALICLOUD_ACCESS_KEY_SECRET',
-            'OSS_BUCKET',
-            'OSS_REGION',
+            ['access key id', accessKeyId],
+            ['access key secret', accessKeySecret],
+            ['OSS_BUCKET', process.env.OSS_BUCKET],
+            ['OSS_REGION', process.env.OSS_REGION],
           ];
 
-          for (const key of required) {
-            if (!process.env[key]) {
-              throw new Error(`Missing environment variable: ${key}`);
+          for (const [name, value] of required) {
+            if (!value) {
+              throw new Error(`Missing environment variable: ${name}`);
             }
           }
 
@@ -94,8 +116,8 @@ jobs:
             region: process.env.OSS_REGION,
             bucket: process.env.OSS_BUCKET,
             endpoint: process.env.OSS_ENDPOINT || undefined,
-            accessKeyId: process.env.ALICLOUD_ACCESS_KEY_ID,
-            accessKeySecret: process.env.ALICLOUD_ACCESS_KEY_SECRET,
+            accessKeyId,
+            accessKeySecret,
           });
 
           const distDir = path.resolve(process.cwd(), '../admin-web/dist');
@@ -119,6 +141,12 @@ jobs:
           }
 
           console.log('OSS upload completed.');
+
+          await client.putBucketWebsite(process.env.OSS_BUCKET, {
+            index: 'index.html',
+            error: { key: 'index.html' },
+          });
+          console.log('Static website hosting enabled (index: index.html, error: index.html).');
           NODE
 
       - name: Install Serverless Devs
